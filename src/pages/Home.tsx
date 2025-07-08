@@ -1,25 +1,18 @@
 import { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../hooks/reduxHook";
-import { CityCardWeather } from "../components/CityCardWeather";
-import { Modal } from "../components/Modal";
-import { CityDetails } from "../components/CityWeatherDetails";
 import { useLocation, useNavigate } from "react-router-dom";
+import { CityCardWeather } from "../components/CityCardWeather";
 import { WeatherService } from "../services/queryWeather";
 
 const Home = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
 
-  const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newCity, setNewCity] = useState("");
-  const [defaultCities, setDefaultCities] = useState([
-    "Kyiv",
-    "Lviv",
-    "Odesa",
-    "Dnipro",
-  ]);
+  const [defaultCities, setDefaultCities] = useState<string[]>(() => {
+    const stored = localStorage.getItem("cities");
+    return stored ? JSON.parse(stored) : ["Kyiv", "Lviv", "Odesa", "Dnipro"];
+  });
 
   const query = new URLSearchParams(location.search);
   const cityInQuery = query.get("city");
@@ -33,63 +26,39 @@ const Home = () => {
     },
   });
 
-  // const { cities, weatherData, statusByCity, error } = useAppSelector(
-  //   (state) => state.weatherSlice
-  // );
-
   useEffect(() => {
     if (cityInQuery) {
-      setSelectedCity(cityInQuery);
       setIsModalOpen(true);
     } else {
       setIsModalOpen(false);
-      setSelectedCity(null);
     }
   }, [cityInQuery]);
 
-  // useEffect(() => {
-  //   const savedCities = localStorage.getItem("cities");
-  //   if (savedCities) {
-  //     const parsedCities: string[] = JSON.parse(savedCities);
-  //     parsedCities.forEach(async (city) => {
-  //       if (!cities.includes(city)) {
-  //         const resultAction = await dispatch(fetchWeatherByCityName(city));
-  //         if (fetchWeatherByCityName.fulfilled.match(resultAction)) {
-  //           dispatch(addCity(city));
-  //         }
-  //       }
-  //     });
-  //   } else {
-  //     defaultCities.forEach(async (city) => {
-  //       if (!cities.includes(city)) {
-  //         const resultAction = await dispatch(fetchWeatherByCityName(city));
-  //         if (fetchWeatherByCityName.fulfilled.match(resultAction)) {
-  //           dispatch(addCity(city));
-  //         }
-  //       }
-  //     });
-  //   }
-  // }, [dispatch]);
-
-  // useEffect(() => {
-  //   localStorage.setItem("cities", JSON.stringify(cities));
-  // }, [cities]);
-
-  // useEffect(() => {
-  //   cities.forEach((city) => {
-  //     dispatch(fetchWeatherByCityName(city));
-  //   });
-  // }, [cities, dispatch]);
+  useEffect(() => {
+    localStorage.setItem("cities", JSON.stringify(defaultCities));
+  }, [defaultCities]);
 
   const handleAddCity = () => {
-    if (newCity) {
-      fetchCityWeather({ cityName: newCity });
+    const trimmed = newCity.trim();
+    if (trimmed && !defaultCities.includes(trimmed)) {
+      fetchCityWeather({ cityName: trimmed });
     }
+    setNewCity("");
   };
 
-  // const handleRemoveCity = (city: string) => {
-  //   dispatch(removeCity(city));
-  // };
+  const openModal = (city: string) => {
+    setIsModalOpen(true);
+    navigate(`/?city=${encodeURIComponent(city)}`);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    navigate(`/`);
+  };
+
+  const handleRemoveCity = (city: string) => {
+    setDefaultCities((prev) => prev.filter((c) => c !== city));
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-100 to-blue-200 py-10 px-4">
@@ -129,11 +98,10 @@ const Home = () => {
             <CityCardWeather
               key={city}
               city={city}
-              weatherData={undefined}
-              isLoading={false}
-              onRefresh={() => {}}
-              onRemove={() => {}}
-              onOpenModal={() => {}}
+              isModalOpen={isModalOpen}
+              closeModal={closeModal}
+              onRemove={handleRemoveCity}
+              onOpenModal={openModal}
             />
           ))}
         </div>

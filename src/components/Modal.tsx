@@ -28,7 +28,7 @@ const Modal = ({ children, onClose }: ModalProps) => {
           ×
         </button>
 
-        <div className="p-6">{children}</div>
+        <div className="p-4">{children}</div>
       </div>
     </div>
   );

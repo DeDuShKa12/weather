@@ -1,27 +1,25 @@
-import { useLocation } from "react-router-dom";
 import { WeatherService } from "../services/queryWeather";
-import { useState } from "react";
 import { Modal } from "./Modal";
 import { CityDetails } from "./CityWeatherDetails";
+import { Spiner } from "./Spiner";
 
 interface CityCardWeatherProps {
   city: string;
-  weatherData: any;
-  isLoading: boolean;
-  onRefresh: (city: string) => void;
+  isModalOpen: boolean;
+  closeModal: () => void;
   onRemove: (city: string) => void;
   onOpenModal: (city: string) => void;
 }
 
 const CityCardWeather = ({
   city,
-  isLoading,
-  onRefresh,
+  isModalOpen,
+  closeModal,
   onRemove,
   onOpenModal,
 }: CityCardWeatherProps) => {
-  const [isModalOpened, setIsModalOpened] = useState(false);
-  const { data, refetch } = WeatherService.useWeatherByCityName(city);
+  const { data, refetch, isLoading, isFetching } =
+    WeatherService.useWeatherByCityName(city);
   const icon = data?.weather[0]?.icon;
   const iconUrl = icon
     ? `https://openweathermap.org/img/wn/${icon}@2x.png`
@@ -29,43 +27,16 @@ const CityCardWeather = ({
 
   return (
     <>
-      {isModalOpened && (
-        <Modal
-          onClose={() => {
-            setIsModalOpened(false);
-          }}
-        >
+      {isModalOpen && (
+        <Modal onClose={() => closeModal()}>
           <CityDetails city={city} />
         </Modal>
       )}
       <div className="relative bg-white p-5 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 flex flex-col justify-between">
-        {isLoading && (
-          <div className="absolute top-3 right-3">
-            <svg
-              className="animate-spin h-6 w-6 text-blue-600"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-              />
-            </svg>
-          </div>
-        )}
+        {isFetching && <Spiner className="absolute top-3 right-3" />}
 
         <div
-          onClick={() => setIsModalOpened(true)}
+          onClick={() => onOpenModal(city)}
           className="cursor-pointer group flex items-center gap-4"
         >
           {icon && (

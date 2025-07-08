@@ -8,12 +8,14 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { WeatherService } from "../services/queryWeather";
+import { Spiner } from "./Spiner";
 
 const CityDetails = ({ city }: { city: string }) => {
   console.log({ city });
 
-  const { data: weather } = WeatherService.useWeatherByCityName(city);
-  const { data: detailedWeather } =
+  const { data: weather, isLoading } =
+    WeatherService.useWeatherByCityName(city);
+  const { data: detailedWeather, isLoading: isLoadingDetails } =
     WeatherService.useWetherDetailsByCityName(city);
 
   const hourly = useMemo(() => {
@@ -32,7 +34,7 @@ const CityDetails = ({ city }: { city: string }) => {
     })) || [];
 
   return (
-    <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-md relative">
+    <div className="bg-white p-4 rounded-xl shadow-md relative">
       {weather && (
         <>
           <div className="flex items-center gap-4 mb-4">
@@ -58,7 +60,7 @@ const CityDetails = ({ city }: { city: string }) => {
             Hourly Temperature Forecast
           </h3>
 
-          <div className="w-full h-72 bg-white rounded-lg p-4 border">
+          <div className="w-full h-72 bg-white rounded-lg py-4 pr-4 border">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={data}>
                 <XAxis dataKey="time" stroke="#888" />
@@ -83,30 +85,7 @@ const CityDetails = ({ city }: { city: string }) => {
         </>
       )}
 
-      {(!weather || !hourly) && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-          <svg
-            className="animate-spin h-6 w-6 text-blue-600"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-            />
-          </svg>
-        </div>
-      )}
+      {(isLoadingDetails || isLoading) && <Spiner className="absolute top-1 right-8"/>}
     </div>
   );
 };
