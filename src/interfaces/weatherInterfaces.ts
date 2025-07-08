@@ -42,3 +42,8 @@ export interface WeatherResponse {
   name: string;
   cod: number;
 }
+
+export interface ApiError {
+  cod: number;
+  message: string;
+}

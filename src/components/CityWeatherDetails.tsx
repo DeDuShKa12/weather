@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -7,28 +7,18 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useAppDispatch, useAppSelector } from "../hooks/reduxHook";
-import {
-  fetchHourlyForecast,
-  fetchWeatherByCityName,
-} from "../redux/slices/weatherSlice";
+import { WeatherService } from "../services/queryWeather";
 
 const CityDetails = ({ city }: { city: string }) => {
-  const dispatch = useAppDispatch();
-  const weather = useAppSelector(
-    (state) => state.weatherSlice.weatherData[city!]
-  );
-  const hourly = useAppSelector((state) => state.weatherSlice.hourly[city!]);
+  console.log({ city });
 
-  useEffect(() => {
-    if (city) {
-      if (!weather) {
-        dispatch(fetchWeatherByCityName(city));
-      } else {
-        dispatch(fetchHourlyForecast({ city }));
-      }
-    }
-  }, [city, weather, dispatch]);
+  const { data: weather } = WeatherService.useWeatherByCityName(city);
+  const { data: detailedWeather } =
+    WeatherService.useWetherDetailsByCityName(city);
+
+  const hourly = useMemo(() => {
+    return detailedWeather?.list?.slice(0, 12) || [];
+  }, [detailedWeather]);
 
   const iconCode = weather?.weather[0]?.icon;
   const iconUrl = iconCode
@@ -36,7 +26,7 @@ const CityDetails = ({ city }: { city: string }) => {
     : "";
 
   const data =
-    hourly?.map((h) => ({
+    hourly?.map((h: any) => ({
       time: new Date(h.dt * 1000).getHours() + ":00",
       temp: h.main.temp,
     })) || [];
