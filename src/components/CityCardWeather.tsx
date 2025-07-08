@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 interface CityCardWeatherProps {
   city: string;
@@ -6,6 +6,7 @@ interface CityCardWeatherProps {
   isLoading: boolean;
   onRefresh: (city: string) => void;
   onRemove: (city: string) => void;
+  onOpenModal: (city: string) => void;
 }
 
 const CityCardWeather = ({
@@ -14,7 +15,9 @@ const CityCardWeather = ({
   isLoading,
   onRefresh,
   onRemove,
+  onOpenModal,
 }: CityCardWeatherProps) => {
+  const location = useLocation();
   const data = weatherData;
   const icon = data?.weather[0]?.icon;
   const iconUrl = icon
@@ -23,7 +26,6 @@ const CityCardWeather = ({
 
   return (
     <div className="relative bg-white p-5 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 flex flex-col justify-between">
-      {/* Спінер справа зверху */}
       {isLoading && (
         <div className="absolute top-3 right-3">
           <svg
@@ -49,7 +51,10 @@ const CityCardWeather = ({
         </div>
       )}
 
-      <Link to={`/city/${city}`} className="group flex items-center gap-4">
+      <div
+        onClick={() => onOpenModal(city)}
+        className="cursor-pointer group flex items-center gap-4"
+      >
         {icon && (
           <img
             src={iconUrl}
@@ -70,7 +75,7 @@ const CityCardWeather = ({
             <p className="text-gray-400 mt-1">Loading data...</p>
           )}
         </div>
-      </Link>
+      </div>
 
       <div className="mt-4 flex gap-2">
         <button
