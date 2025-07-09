@@ -42,3 +42,42 @@ export interface WeatherResponse {
   name: string;
   cod: number;
 }
+
+export interface ForecastResponse {
+  cod: string;
+  message: number;
+  cnt: number;
+  list: ForecastItem[];
+  city: {
+    name: string;
+    country: string;
+    coord: {
+      lat: number;
+      lon: number;
+    };
+    timezone: number;
+    sunrise: number;
+    sunset: number;
+  };
+}
+
+export interface ForecastItem {
+  dt: number;
+  dt_txt: string;
+  main: {
+    temp: number;
+    feels_like: number;
+    humidity: number;
+  };
+  weather: {
+    main: string;
+    description: string;
+    icon: string;
+  }[];
+  wind: {
+    speed: number;
+  };
+  rain?: {
+    ["3h"]: number;
+  };
+}

@@ -1,4 +1,5 @@
 import { useParams } from "react-router-dom";
+
 import { CityDetails } from "../components/CityWeatherDetails";
 
 const CityDetailsPage = () => {
